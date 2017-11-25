@@ -42,7 +42,7 @@ function withcode_supports($feature) {
 }
 
 function withcode_grade_item_update($withcode, $grades=NULL){
-	$params = array('itemname'=>$withcode->name, 'idnumber'=>$withcode->cmidnumber);
+	$params = array('itemname'=>$withcode->name);
 	$max_scores = withcode_get_max_scores($withcode);
 	$params['gradetype'] = GRADE_TYPE_VALUE;
 	

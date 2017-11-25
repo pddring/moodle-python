@@ -28,12 +28,13 @@ require_once($CFG->dirroot . '/mod/withcode/lib.php');
 require_once($CFG->dirroot . '/mod/withcode/locallib.php');
 
 
-$PAGE->requires->css('/mod/withcode/styles.css');
-$PAGE->requires->css('/mod/withcode/withcode.css');
-$PAGE->requires->js('/mod/withcode/js/ace/ace.js');
-$PAGE->requires->js('/mod/withcode/js/skulpt/skulpt.min.js');
-$PAGE->requires->js('/mod/withcode/js/skulpt/skulpt-stdlib.js');
-$PAGE->requires->js('/mod/withcode/js/lib.js');
+$PAGE->requires->css(new moodle_url($CFG->wwwroot . '/mod/withcode/styles.css'));
+$PAGE->requires->css(new moodle_url($CFG->wwwroot . '/mod/withcode/withcode.css'));
+$PAGE->requires->jquery();
+$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/mod/withcode/js/ace/ace.js'));
+$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/mod/withcode/js/skulpt/skulpt.min.js'));
+$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/mod/withcode/js/skulpt/skulpt-stdlib.js'));
+$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/mod/withcode/js/lib.js'));
 
 
 
