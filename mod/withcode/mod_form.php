@@ -106,9 +106,11 @@ class mod_withcode_mod_form extends moodleform_mod {
 		}
 	
 		
-		$PAGE->requires->css('/mod/withcode/styles.css');
-		$PAGE->requires->js('/mod/withcode/js/ace/ace.js');
-		$PAGE->requires->js('/mod/withcode/js/lib.js');
+		$PAGE->requires->css(new moodle_url($CFG->wwwroot . '/mod/withcode/styles.css'));
+		$PAGE->requires->jquery();
+		$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/mod/withcode/js/ace/ace.js'));
+		$PAGE->requires->js(new moodle_url($CFG->wwwroot . '/mod/withcode/js/lib.js'));
+
 		$PAGE->requires->js_function_call('withcode.setupForm', array());
  
  
