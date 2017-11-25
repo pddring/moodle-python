@@ -38,8 +38,14 @@ class mod_withcode_mod_form extends moodleform_mod {
  
     function definition() {
         global $CFG, $DB, $OUTPUT, $PAGE;
- 
+ 		
         $mform =& $this->_form;
+		$PAGE->requires->jquery();
+		if(get_config('withcode', 'linkbootstrap')) {
+			$html = '<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script><link rel="stylesheet" type="text/stylesheet"href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">';
+			$mform->addElement('html', $html);	
+		}
+		
 		 
         $mform->addElement('header', 'general', get_string('general', 'form'));
         $mform->addElement('text', 'name', get_string('skillname', 'withcode'), array('size'=>'64'));
@@ -52,9 +58,9 @@ class mod_withcode_mod_form extends moodleform_mod {
 		
 		$mform->addElement('html', '<div id="tabs_tde">
 		<ul class="nav nav-tabs">
-		<li class="active"><a href="#tab_try" data-toggle="tab">Try it</a></li>
-		<li><a href="#tab_debug" data-toggle="tab">Debug it</a></li>
-		<li><a href="#tab_extend" data-toggle="tab">Extend it</a></li>
+		<li role="presentation" class="active"><a href="#tab_try" data-toggle="tab">Try it</a></li>
+		<li role="presentation"><a href="#tab_debug" data-toggle="tab">Debug it</a></li>
+		<li role="presentation"><a href="#tab_extend" data-toggle="tab">Extend it</a></li>
 		</ul>
 		<div class="tab-content">
 		<div id="tab_try" class="tab-pane active"><img src="' . $CFG->wwwroot . '/mod/withcode/pix/tryit.png">
