@@ -181,7 +181,7 @@ switch($cmd) {
 	if(count($uids) > 0) {
 	
 		$uids = implode(",", $uids);
-		$sql = 'SELECT u.id, u.firstname, u.lastname, s.id AS snippetid, s.withcodeid, s.timecreated, s.files, s.score_try, s.score_debug, s.score_extend, s.score_total FROM {withcode_snippet} AS s RIGHT OUTER JOIN {user} AS u ON u.id=s.userid WHERE u.id IN (' . $uids . ') AND (s.withcodeid = ' . $cm->instance . ' OR s.withcodeid IS NULL) AND (s.timecreated > ' . $since . ' OR s.timecreated IS NULL) ' . $orderclause;
+		$sql = 'SELECT u.id AS userid, u.firstname, u.lastname, s.id AS snippetid, s.withcodeid, s.timecreated, s.files, s.score_try, s.score_debug, s.score_extend, s.score_total FROM {withcode_snippet} AS s RIGHT OUTER JOIN {user} AS u ON u.id=s.userid WHERE u.id IN (' . $uids . ') AND (s.withcodeid = ' . $cm->instance . ' OR s.withcodeid IS NULL) AND (s.timecreated > ' . $since . ' OR s.timecreated IS NULL) ' . $orderclause;
 		
 		$snippets = $DB->get_records_sql($sql);
 		

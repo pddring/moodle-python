@@ -667,7 +667,7 @@ var PythonIDE = {
 						var c = test.conditions[j];	
 						var indicator = '<i class="fa fa-' + (c.met?'check test_passed':'times test_failed') + '"></i>';
 						if(c.o) {
-							test.description += '<li>' + indicator + 'Display the text: "' + c.o + '"</li>';
+							test.description += '<li>' + indicator + 'Display the text: <pre>"' + c.o + '"</pre></li>';
 						}
 						if(c.p) {
 							test.description += '<li>' + indicator + 'Ask the user: "' + c.p + '"</li>';
@@ -676,13 +676,13 @@ var PythonIDE = {
 							test.description += '<li>' + indicator + 'Set the variable ' + c.g + ' to the value ' + c.v + '</li>';
 						}
 						if(c.f) {
-							test.description += '<li>' + indicator + 'Save ' + c.d + ' into the file ' + c.f + '</li>'
+							test.description += '<li>' + indicator + 'Save <pre>' + c.d + '</pre> into the file ' + c.f + '</li>'
 						}
 						if(c.c) {
 							test.description += '<li>' + indicator + 'Add a comment including ' + c.c + '</li>';
 						}
 						if(c.l) {
-							test.description += '<li>' + indicator + 'Include the text "' + c.l + '" in your code</li>';
+							test.description += '<li>' + indicator + 'Include the text <pre>"' + c.l + '"</pre> in your code</li>';
 						}
 					}
 					test.description += '</ol>';
