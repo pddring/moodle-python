@@ -537,7 +537,7 @@ var PythonIDE = {
 				writeFile: PythonIDE.writeFile,
 				read: PythonIDE.python.builtinread});
 			Sk.execLimit = 2000;
-			
+			Sk.python3 = true;
 			
 			var handlers = [];
 			handlers["Sk.debug"] = function(susp) {
