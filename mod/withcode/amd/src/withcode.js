@@ -402,11 +402,13 @@ var PythonIDE = {
 		for(file in PythonIDE.tests){
 			var total = 0;
 			for(var i = 0; i < PythonIDE.tests[file].length; i++){
-				if(PythonIDE.tests[file][i].completed) {
-					total += PythonIDE.tests[file][i].points;
-					data.score_total += PythonIDE.tests[file][i].points;
+				if(PythonIDE.tests[file][i].completed > 0) {
+					total += (PythonIDE.tests[file][i].points * PythonIDE.tests[file][i].completed);
+					data.score_total += (PythonIDE.tests[file][i].points * PythonIDE.tests[file][i].completed);
 				}
 			}
+			total = Math.round(total);
+			data.score_total = Math.round(data.score_total);
 			switch(file) {
 				case 'try_it.py':
 					data.score_try += total;
@@ -453,13 +455,15 @@ var PythonIDE = {
 	
 	tests: [],
 	
-	controlledTest: function(code, test) {
+	controlledTest: function(code, test, iteration) {
 		if(!test.conditions){
 			test.conditions = [];
 		}
+		if(iteration === undefined)
+			iteration = 0;
 		var conditions = test.conditions;
 		for(var i = 0; i < conditions.length; i++) {
-			conditions[i].met = false;
+			conditions[i].met[iteration] = false;
 		}
 		var p = new Promise(function(resolve, reject){
 			var examples = [
@@ -474,12 +478,19 @@ var PythonIDE = {
 			var i = 0; // current condition number
 			
 			function output(msg) {
-				
 				//console.log(msg, conditions[i])
-				if(i < conditions.length && conditions[i].o && msg.match(conditions[i].o)){
-					conditions[i].met = true;
-					i++;
-					
+				if(i < conditions.length && conditions[i].o) {
+					if(Array.isArray(conditions[i].o)) {
+						if(msg.match(conditions[i].o[iteration])){
+							conditions[i].met[iteration] = true;
+							i++;
+						}
+					} else {
+						if(msg.match(conditions[i].o)){
+							conditions[i].met[iteration] = true;
+							i++;
+						}
+					}					
 				}
 				
 				if(msg.trim().length > 0) {
@@ -489,10 +500,20 @@ var PythonIDE = {
 			
 			function input(question) {
 				var answer = "";
-				if(i < conditions.length && conditions[i].p && question.match(conditions[i].p) && conditions[i].i) {
-					conditions[i].met = true;
-					answer = conditions[i].i;
-					i++;
+				if(i < conditions.length && conditions[i].p && conditions[i].i) {
+					if(Array.isArray(conditions[i].i)) {
+						if(question.match(conditions[i].p)) {
+							conditions[i].met[iteration] = true;
+							answer = conditions[i].i[iteration];
+							i++;	
+						}
+					} else {
+						if(question.match(conditions[i].p)) {
+							conditions[i].met[iteration] = true;
+							answer = conditions[i].i;
+							i++;	
+						}
+					}			
 				}
 				return answer;
 			};
@@ -572,15 +593,21 @@ var PythonIDE = {
 				PythonIDE.updateFileTabs();
 				var result = {conditions: conditions, met: 0, total: 0};
 				for(var i = 0; i < conditions.length; i++) {
-					
-					if(conditions[i].met) {
-						result.met++;
+					var iterationScore = 0;
+					for(var j = 0; j < conditions[i].met.length; j++) {
+						if(conditions[i].met[j]) {
+							iterationScore++;
+						}	
 					}
+					result.met+=(iterationScore / conditions[i].met.length);
 					result.total++;
 				}
-				if(result.met == result.total) {
-					test.completed = true;
+				if(result.total < 1) {
+					test.completed = 0;
+				} else {
+					test.completed = result.met / result.total;
 				}
+				
 				resolve(result);
 				
 			}, function (e) {
@@ -605,14 +632,26 @@ var PythonIDE = {
 			
 			for(var i = 0; i < PythonIDE.tests[file].length; i++) {
 				var t = PythonIDE.tests[file][i];
-				t.completed = false;
+				t.completed = 0;
 				var code = PythonIDE.files[file];
 				if(t.codeHeader)
 					code = t.codeHeader + "\n" + code;
 				if(t.codeFooter)
 					code += "\n" + t.codeFooter;
-				var p = PythonIDE.controlledTest(code, t);
-				tests.push(p);
+				if(!t.iterations) 
+					t.iterations = 1;
+				
+				for(var j = 0; j < t.conditions.length; j++) {
+					t.conditions[j].met = [];
+					for(var k = 0; k < t.iterations; k++) {
+						t.conditions[j].met[k] = false;
+					}
+				}
+				
+				for(var j = 0; j < t.iterations; j++) {
+					var p = PythonIDE.controlledTest(code, t, j);
+					tests.push(p);
+				}				
 			}
 			
 			
@@ -647,30 +686,55 @@ var PythonIDE = {
 			var html = '<h3>Tests:</h3>';
 			for(var i =0; i < PythonIDE.tests[file].length; i++) {
 				var test = PythonIDE.tests[file][i];
+				if(test.iterations == undefined) {
+					test.iterations = 1;
+				}
+					
 				if(maxScores[file] == undefined)
 					maxScores[file] = 0;
 				maxScores[file] += test.points;
 				maxScores.total += test.points;
 				html += '<div class="test_descriptions">';
-				if(test.completed) {
+				if(test.completed > 0) {
 					html += '<h4><i class="fa fa-check-circle-o test_passed"></i> ';
 					if(currentScores[file] == undefined)
 						currentScores[file] = 0;
-					currentScores[file] += test.points;
-					currentScores.total += test.points;
+					currentScores[file] += (test.points * test.completed);
+					currentScores.total += (test.points * test.completed);
 				} else {
 					html += '<h4><i class="fa fa-times-circle-o test_failed"></i> ';
 				}
 				if(undefined == test.description) {
 					test.description = '<ol>';
 					for(var j = 0; j < test.conditions.length; j++) {
-						var c = test.conditions[j];	
-						var indicator = '<i class="fa fa-' + (c.met?'check test_passed':'times test_failed') + '"></i>';
+						var c = test.conditions[j];
+						var passCount = 0;
+						var iterationStatus = '';						
+						var optionalClass = '';
+						if(c.met) {
+							for(var k = 0; k < c.met.length; k++) {
+								if(c.met[k])
+									passCount++;
+							}
+							if(c.met.length > 1) {
+								iterationStatus = passCount + "/" + c.met.length + ' ';
+								if(passCount < c.met.length) {
+									optionalClass = ' test_partial';
+								}
+							}
+						}
+
+						var indicator = '<i class="fa fa-' + ((passCount > 0)?'check test_passed':'times test_failed') + optionalClass + '"></i> ' + iterationStatus;
 						if(c.o) {
-							test.description += '<li>' + indicator + 'Display the text: <pre>"' + c.o + '"</pre></li>';
+							test.description += '<li> ' + indicator + 'Display the text: <pre>' + c.o + '</pre></li>';
 						}
 						if(c.p) {
-							test.description += '<li>' + indicator + 'Ask the user: "' + c.p + '"</li>';
+							if(c.i) {
+								test.description += '<li>' + indicator + 'When asked <pre>' + c.p + '</pre>, the user inputs: <pre>' + c.i + '</pre> </li>';
+							} else {
+								test.description += '<li>' + indicator + 'Ask the user: <pre>' + c.p + '</pre></li>';
+							}
+							
 						}
 						if(c.g) {
 							test.description += '<li>' + indicator + 'Set the variable ' + c.g + ' to the value ' + c.v + '</li>';
@@ -682,15 +746,17 @@ var PythonIDE = {
 							test.description += '<li>' + indicator + 'Add a comment including ' + c.c + '</li>';
 						}
 						if(c.l) {
-							test.description += '<li>' + indicator + 'Include the text <pre>"' + c.l + '"</pre> in your code</li>';
+							test.description += '<li>' + indicator + 'Include the text <pre>' + c.l + '</pre> in your code</li>';
 						}
 					}
 					test.description += '</ol>';
-					html += test.name + '</h4>' + test.description + '</div>' ;
+					html += test.name + '</h4>' + test.description ;
 					delete test.description;
 				} else {
-					html += test.name + '</h4>' + test.description + '</div>' ;
+					html += test.name + '</h4>' + test.description ;
 				}
+
+				html += '</div>';
 				
 				
 				

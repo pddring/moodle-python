@@ -38,7 +38,7 @@ switch($cmd) {
 		}
 		$withcode = $DB->get_record('withcode', array('id'=>$withcodeid));
 		
-		$cm = get_coursemodule_from_instance('withcode', $withcode->id, $withcode->course, 0, false, MUST_EXIT);
+		$cm = get_coursemodule_from_instance('withcode', $withcode->id, $withcode->course, 0, false, MUST_EXIST);
 		$context = context_module::instance($cm->id);
 		if(!has_capability('mod/withcode:view', $context, $USER->id)) {
 			die('{"success":false, "message":"Permission denied"}');
@@ -159,9 +159,9 @@ switch($cmd) {
 	if($withcodeid <= 0) {
 		die('{"success":false, "message":"Invalid withcode id"}');
 	}
-	
 
-	$cm = get_coursemodule_from_id('withcode', $withcodeid, $USER->id, 0, false, MUST_EXIT);
+	
+	$cm = get_coursemodule_from_id('withcode', $withcodeid, 0, 0, false, MUST_EXIST);
 	$context = context_module::instance($cm->id);
 	if(!has_capability('mod/withcode:viewothercode', $context, $USER->id)) {
 		die('{"success":false, "message":"Permission denied"}');

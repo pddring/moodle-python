@@ -27,7 +27,7 @@
 
 defined('MOODLE_INTERNAL') || die();
  
-$plugin->version   = 2017112500;
+$plugin->version   = 2017121700;
 $plugin->requires  = 2014051200;
 $plugin->cron      = 0;
 $plugin->component = 'mod_withcode';

@@ -10,11 +10,15 @@
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" />
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" />
         <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
+		<FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
 		<FIELD NAME="desctry" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
+		<FIELD NAME="desctryformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
         <FIELD NAME="codetry" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
 		<FIELD NAME="descdebug" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
+		<FIELD NAME="descdebugformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
 		<FIELD NAME="codedebug" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
 		<FIELD NAME="descextend" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
+		<FIELD NAME="descextendformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
 		<FIELD NAME="codeextend" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
 		<FIELD NAME="testtry" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />
 		<FIELD NAME="testdebug" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" />

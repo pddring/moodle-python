@@ -45,7 +45,7 @@ $cm = get_coursemodule_from_id('withcode', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $withcode = $DB->get_record('withcode', array('id' => $cm->instance));
 
-$files = array('try_it.py' => '');
+$files = array('try_it.py' => '', 'debug_it.py' => '', 'extend_it.py'=>'');
 if(strlen($withcode->codetry) > 0) {
 	$files['try_it.py'] = $withcode->codetry;
 }
@@ -119,9 +119,12 @@ if(has_capability('mod/withcode:viewothercode', $context, $USER->id)) {
    
 	<?php
 function getProgressBar($score, $total) {
-
-	$w = floor($score / $total * 100);
-	$h = floor($score / $total * 120);
+	if($total > 0) {
+		$w = floor($score / $total * 100);
+		$h = floor($score / $total * 120);
+	} else {
+		$w = $h = 0;
+	}
 	$html = '<div class="student_progress_bar"><div class="student_progress_bar_inner" style="width:' . $w . '%; background-color:hsl('.$h.',100%,50%);border:2px solid hsl('.$h.',100%,50%);"></div></div>';
 	return $html;
 }	
@@ -166,6 +169,9 @@ function getProgressBar($score, $total) {
 
 <h3><button type="button" class="btn btn-info" data-toggle="collapse" data-target="#instructions"><i class="fa fa-sort-down"></i></button> Instructions</h3>
 <div id="instructions" class="collapse in">
+<?php 
+echo(format_text($withcode->intro, $withcode->introformat));
+?>
 <div id="tabs_tde">
 <ul class="nav nav-tabs">
 <li class="nav-item"><a class="nav-link active" href="#tab_try" data-toggle="tab">Try it</a></li>
@@ -177,17 +183,17 @@ function getProgressBar($score, $total) {
 
 echo('<div id="tab_try" class="tab-pane active"><img class="tde_icon" src="' . $CFG->wwwroot . '/mod/withcode/pix/tryit.png">');
 echo('<a href="api.php?cmd=showtemplatecode&section=try&withcodeid=' . $withcode->id . '" target="_blank"><button class="btn"><i class="fa fa-share"></i> Show template code (try_it.py)</button></a>');
-echo($withcode->desctry);
+echo(format_text($withcode->desctry, $withcode->desctryformat));
 echo('<div id="tests_try"></div>');
 echo('</div>');
 echo('<div id="tab_debug" class="tab-pane"><img class="tde_icon" src="' . $CFG->wwwroot . '/mod/withcode/pix/debugit.png">');
 echo('<a href="api.php?cmd=showtemplatecode&section=debug&withcodeid=' . $withcode->id . '" target="_blank"><button class="btn"><i class="fa fa-share"></i> Show template code (debug_it.py)</button></a>');
-echo($withcode->descdebug);
+echo(format_text($withcode->descdebug, $withcode->descdebugformat));
 echo('<div id="tests_debug"></div>');
 echo('</div>');
 echo('<div id="tab_extend" class="tab-pane"><img class="tde_icon" src="' . $CFG->wwwroot . '/mod/withcode/pix/extendit.png">');
 echo('<a href="api.php?cmd=showtemplatecode&section=extend&withcodeid=' . $withcode->id . '" target="_blank"><button class="btn"><i class="fa fa-share"></i> Show template code (extend_it.py)</button></a>');
-echo($withcode->descextend);
+echo(format_text($withcode->descextend, $withcode->descextendformat));
 echo('<div id="tests_extend"></div>');
 echo('</div></div></div></div>');
 

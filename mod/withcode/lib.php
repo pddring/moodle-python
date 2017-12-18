@@ -31,6 +31,13 @@ function withcode_add_instance($withcode) {
 	
 	$withcode->timecreated = time();
 	$withcode->timemodified = time();
+	
+	$withcode->desctryformat = $withcode->desctry['format'];
+	$withcode->desctry = $withcode->desctry['text'];
+	$withcode->descdebugformat = $withcode->descdebug['format'];
+	$withcode->descdebug = $withcode->descdebug['text'];
+	$withcode->descextendformat = $withcode->descextend['format'];
+	$withcode->descextend = $withcode->descextend['text'];
 	return $DB->insert_record('withcode', $withcode);
 }
 
@@ -92,9 +99,13 @@ function withcode_update_instance($withcode) {
 	$withcode->timemodified = time();
 	$withcode->id = $withcode->instance;
 	
+	$withcode->desctryformat = $withcode->desctry['format'];
 	$withcode->desctry = $withcode->desctry['text'];
+	$withcode->descdebugformat = $withcode->descdebug['format'];
 	$withcode->descdebug = $withcode->descdebug['text'];
+	$withcode->descextendformat = $withcode->descextend['format'];
 	$withcode->descextend = $withcode->descextend['text'];
+	
 	
 	withcode_grade_item_update($withcode);
 	

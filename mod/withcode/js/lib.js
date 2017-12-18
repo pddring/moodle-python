@@ -60,7 +60,7 @@ var withcode = {
 			$('#loading').hide();
 			$('#holder').show();
 			if(files == undefined)
-				files = {'test.py': 'Hello'};
+				files = {'try_it.py': '', 'debug_it.py':'', 'extend_it.py':''};
 			PythonIDE.files = files;
 			PythonIDE.instance = id;
 			progressUpdates = {};
@@ -68,7 +68,7 @@ var withcode = {
 			if(tests){
 				for(file in tests){
 					try {
-						jsTests[file] = JSON.parse(tests[file]).tests;
+						jsTests[file] = JSON.parse(tests[file]);
 						for(var i = 0; i < jsTests[file].length; i++) {
 							var test = jsTests[file][i];
 							

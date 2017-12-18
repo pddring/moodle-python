@@ -58,9 +58,9 @@ class mod_withcode_mod_form extends moodleform_mod {
 		
 		$mform->addElement('html', '<div id="tabs_tde">
 		<ul class="nav nav-tabs">
-		<li role="presentation" class="active"><a href="#tab_try" data-toggle="tab">Try it</a></li>
-		<li role="presentation"><a href="#tab_debug" data-toggle="tab">Debug it</a></li>
-		<li role="presentation"><a href="#tab_extend" data-toggle="tab">Extend it</a></li>
+		<li class="nav-item"><a class="nav-link active" href="#tab_try" data-toggle="tab">Try it</a></li>
+		<li class="nav-item"><a class="nav-link" href="#tab_debug" data-toggle="tab">Debug it</a></li>
+		<li class="nav-item"><a class="nav-link" href="#tab_extend" data-toggle="tab">Extend it</a></li>
 		</ul>
 		<div class="tab-content">
 		<div id="tab_try" class="tab-pane active"><img src="' . $CFG->wwwroot . '/mod/withcode/pix/tryit.png">
@@ -114,7 +114,6 @@ class mod_withcode_mod_form extends moodleform_mod {
 		$PAGE->requires->js_function_call('withcode.setupForm', array());
  
  
-        $this->add_action_buttons();
 		
         $this->standard_coursemodule_elements();
  

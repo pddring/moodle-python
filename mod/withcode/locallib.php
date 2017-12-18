@@ -17,7 +17,7 @@ function withcode_get_max_scores($withcode) {
 	$result->max_total = 0;
 	try {
 		if($tests = json_decode($withcode->testtry)) {
-			foreach($tests->tests as $test) {
+			foreach($tests as $test) {
 				$result->max_try += $test->points;
 			}
 		} 
