@@ -55,7 +55,6 @@ var withcode = {
 	},
 	
 	init: function(files, tests, id) {
-		
 		require(['jquery', 'mod_withcode/withcode'], function($, PythonIDE) {
 			$('#loading').hide();
 			$('#holder').show();
@@ -71,7 +70,6 @@ var withcode = {
 						jsTests[file] = JSON.parse(tests[file]);
 						for(var i = 0; i < jsTests[file].length; i++) {
 							var test = jsTests[file][i];
-							
 							for(var j = 0; j < test.conditions.length; j++) {
 								for (condition in test.conditions[j]) {
 									if(test.conditions[j][condition][0] == "/" && test.conditions[j][condition].slice(-1) == "/") {

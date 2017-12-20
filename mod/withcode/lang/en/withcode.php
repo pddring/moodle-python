@@ -51,4 +51,11 @@ $string['linkbootstrap'] = 'Load bootstrap from external CDN';
 $string['configlinkbookstrap'] = 'This plugin requires bootstrap. If your theme includes bootstrap you should disable this setting. If your theme doesn\'t include bootstrap you should enable it.';
 $string['linkfontawesome'] = 'Load fontawesome from external CDN';
 $string['configlinkfontawesome'] = 'This plugin looks better with fontawesome. If your theme includes fontawesome you should disable this setting.';
+$string['withcode:save'] = 'Save';
+$string['withcode:view'] = 'View';
+$string['withcode:viewmycode'] = 'View my code';
+$string['withcode:save'] = 'Save';
+$string['withcode:addinstance'] = 'Add a new python activity';
+$string['withcode:viewothercode'] = 'View other students\' code';
+
 ?>

@@ -500,18 +500,30 @@ var PythonIDE = {
 			
 			function input(question) {
 				var answer = "";
-				if(i < conditions.length && conditions[i].p && conditions[i].i) {
+				if(i < conditions.length && conditions[i].i) {
 					if(Array.isArray(conditions[i].i)) {
-						if(question.match(conditions[i].p)) {
+						if(conditions[i].p) {
+							if(question.match(conditions[i].p)) {
+								conditions[i].met[iteration] = true;
+								answer = conditions[i].i[iteration];
+								i++;	
+							}
+						} else {
 							conditions[i].met[iteration] = true;
 							answer = conditions[i].i[iteration];
-							i++;	
+							i++;
 						}
 					} else {
-						if(question.match(conditions[i].p)) {
+						if(conditions[i].p) {
+							if(question.match(conditions[i].p)) {
+								conditions[i].met[iteration] = true;
+								answer = conditions[i].i;
+								i++;	
+							}
+						} else {
 							conditions[i].met[iteration] = true;
-							answer = conditions[i].i;
-							i++;	
+							answer = conditions[i].i[iteration];
+							i++;
 						}
 					}			
 				}
@@ -529,7 +541,7 @@ var PythonIDE = {
 							var sections = lines[j].split('#', 2);
 							if(sections.length > 1) { 
 								if(sections[1].match(conditions[i].c)) {
-									conditions[i].met = true;
+									conditions[i].met[iteration] = true;
 									i++;
 									break;
 								}
@@ -544,7 +556,7 @@ var PythonIDE = {
 					if(i < conditions.length && conditions[i].l) {
 						var lines = code.split("\n");
 						if (lines.length > line_number && lines[line_number - 1].match(conditions[i].l)){
-							conditions[i].met = true;
+							conditions[i].met[iteration] = true;
 							i++;
 							
 						}
@@ -560,46 +572,56 @@ var PythonIDE = {
 			Sk.execLimit = 2000;
 			Sk.python3 = true;
 			
-			var handlers = [];
-			handlers["Sk.debug"] = function(susp) {
-				///console.log(susp);
-				
+			function testRuntimeConditions(scope) {
 				if(i < conditions.length) {
 					// check global variable
-					if(conditions[i].g && susp.child.$gbl[conditions[i].g]) {
-						if(Sk.ffi.remapToJs(susp.child.$gbl[conditions[i].g]) == conditions[i].v) {
-							conditions[i].met = true;
+					if(conditions[i]&& scope[conditions[i].g]) {
+						var actualValue = conditions[i].g;
+						var desiredValue = Array.isArray(conditions[i].v)?conditions[i].v[iteration]:conditions[i].v
+						if(Sk.ffi.remapToJs(scope[actualValue]) == desiredValue) {
+							conditions[i].met[iteration] = true;
 							i++;
 						}
 					}
-					
+				}
+				if(i < conditions.length) {	
 					// check file
 					if(conditions[i].f && PythonIDE.files[conditions[i].f]){
 						if(PythonIDE.files[conditions[i].f].match(conditions[i].d)) {
-							conditions[i].met = true;
+							conditions[i].met[iteration] = true;
 							i++;
 						}
 					}
 					
-				} 
-				
+				}
+			}
+			var handlers = [];
+			handlers["Sk.debug"] = function(susp) {
+				///console.log(susp);
+				testRuntimeConditions(susp.child.$gbl);
 			}
 			Sk.misceval.callsimAsync(handlers, function() {
 				return Sk.importMainWithBody("test",false,code,true);
 			}).then(function(module){
-				
+				testRuntimeConditions(module.$d);
 				Sk.inputfun = inputBackup;
 				PythonIDE.files = filesBackup;
 				PythonIDE.updateFileTabs();
 				var result = {conditions: conditions, met: 0, total: 0};
 				for(var i = 0; i < conditions.length; i++) {
 					var iterationScore = 0;
-					for(var j = 0; j < conditions[i].met.length; j++) {
-						if(conditions[i].met[j]) {
-							iterationScore++;
-						}	
+					if(Array.isArray(conditions[i].met)) {
+						for(var j = 0; j < conditions[i].met.length; j++) {
+							if(conditions[i].met[j]) {
+								iterationScore++;
+							}	
+						}
+						result.met+=(iterationScore / conditions[i].met.length);
+					} else {
+						iterationScore = conditions[i].met?1:0;
+						result.met += iterationScore;
 					}
-					result.met+=(iterationScore / conditions[i].met.length);
+					
 					result.total++;
 				}
 				if(result.total < 1) {
@@ -681,9 +703,126 @@ var PythonIDE = {
 	updateTests: function() {
 		var maxScores = {total: 0};
 		var currentScores = {total: 0};
+		
+		function getTestID(testNumber, iteration) {
+			return (testNumber + 1) + "." + (iteration + 1);
+		}
+		
 		for(var file in PythonIDE.tests) {
 		
 			var html = '<h3>Tests:</h3>';
+			for(var i = 0; i < PythonIDE.tests[file].length; i++) {
+				var test = PythonIDE.tests[file][i];
+				
+				var tick = '';
+				if(test.completed == 1) {
+					tick = '<i class="fa fa-check-circle-o test_passed"></i>';
+				} else {
+					if(test.completed > 0) {
+						tick = '<i class="fa fa-check-circle-o test_partial"></i>';
+					} else {
+						tick = '<i class="fa fa-times-circle-o test_failed"></i>';
+					}
+					
+				}
+				
+				var rows = [];
+				var cols = ['Test number'];
+				rows.push(cols);
+				
+				
+				for(var j = 0; j < test.iterations; j++) {
+					var cols = [getTestID(i, j)]; 
+					rows.push(cols);
+				}
+				
+				function eAt(a, i) {
+					if(Array.isArray(a)) {
+						return a[i];
+					}
+					return a;
+				}
+				
+				function getCheck(c, k) {
+					var met = false;
+					if(c.met) {
+						if(Array.isArray(c.met)) {
+							met = c.met[k];
+						} else {
+							met = true;
+						}
+					}
+					return met?'<i class="fa fa-check-circle-o test_passed"></i>':'<i class="fa fa-times-circle-o test_failed"></i>';
+				}
+				
+				for(var j = 0; j < test.conditions.length; j++) {
+					var c = test.conditions[j];
+					// user input
+					if(c.i) {
+						rows[0].push(c.p?'Test data when asked: <pre>' + c.p + '</pre>':'Test data:');
+						for(var k = 0; k < test.iterations; k++) {
+							var check = getCheck(c, k);
+							rows[1 + k].push(check + ' <pre>' + eAt(c.i, k) + '</pre>');
+						}
+					}
+					
+					// console output
+					if(c.o) {
+						rows[0].push('Expected output');
+						for(var k = 0; k < test.iterations; k++) {
+							var check = getCheck(c, k);
+							rows[1 + k].push(check + ' <pre>' + eAt(c.o, k) + '</pre>');
+						}
+					}
+					
+					// global variable
+					if(c.g) {
+						rows[0].push('Expected value of <pre>' + c.g + '</pre> variable');
+						for(var k = 0; k < test.iterations; k++) {
+							var check = getCheck(c, k);
+							
+							rows[1 + k].push(check + ' <pre>' + eAt(c.v, k) + '</pre>');
+						}
+					}
+				}
+				var stats = (test.completed?Math.round(test.completed * 100):'0') + "%";
+				var safe_file = file.replace(".py", "_");
+				html += '<button class="btn btn-secondary" data-toggle="collapse" data-target="#test-' + safe_file + '-' + i + '">' + tick + ' ' + test.name + ' (' + stats + ')</button>';
+				html += '<div id="test-' + safe_file + '-' + i + '" class="collapse"><table class="table">';
+				for(var iRow = 0; iRow < rows.length; iRow++) {
+					var cell = 'td';
+					if(iRow == 0) {
+						html += '<thead>';
+						cell = 'th'
+					} 
+					html += '<tr>';
+					for(var iCol = 0; iCol < rows[iRow].length; iCol++) {
+						html += '<' + cell + '>' + rows[iRow][iCol] + '</' + cell + '>';
+					}
+					html += '</tr>';
+					if(iRow == 0) {
+						html += '</thead>';
+					}
+				}
+				html += '</table></div>';
+				
+				if(maxScores[file] == undefined)
+					maxScores[file] = 0;
+				maxScores[file] += test.points;
+				maxScores.total += test.points;
+				if(test.completed > 0) {
+					if(currentScores[file] == undefined)
+						currentScores[file] = 0;
+					currentScores[file] += (test.points * test.completed);
+					currentScores.total += (test.points * test.completed);
+				}
+			}
+			
+
+			
+			
+			
+			/*
 			for(var i =0; i < PythonIDE.tests[file].length; i++) {
 				var test = PythonIDE.tests[file][i];
 				if(test.iterations == undefined) {
@@ -761,6 +900,7 @@ var PythonIDE = {
 				
 				
 			}
+			*/
 			var target = '';
 			switch(file) {
 				case 'try_it.py':target = 'tests_try';break;
@@ -770,7 +910,7 @@ var PythonIDE = {
 			$('#' + target).html(html);
 			
 		}
-		$('#points').html('<p>score:</p><span class="score">' + currentScores.total + '</span><p>' + (maxScores.total - currentScores.total) + ' more available</p>');
+		$('#points').html('<p>score:</p><span class="score">' + Math.round(currentScores.total) + '</span><p>' + (Math.round(maxScores.total - currentScores.total)) + ' more available</p>');
 		$('.try_total').html(" / " + maxScores['try_it.py']);
 		$('.debug_total').html(" / " + maxScores['debug_it.py']);
 		$('.extend_total').html(" / " + maxScores['extend_it.py']);
